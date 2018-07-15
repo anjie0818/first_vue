@@ -28,6 +28,7 @@
     methods: {
       closeMyself () {
         this.$emit('on-close')
+        console.log("close")
       }
     }
   }

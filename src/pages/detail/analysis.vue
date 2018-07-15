@@ -76,7 +76,7 @@
         <li>用户所在地理区域分布状况等</li>
       </ul>
     </div>
-    <my-dialog :is-show="isShowPayDailog" @on-close="closePayDailog">
+    <my-dialog :is-show="isShowPayDailog" @on-close="closeShowPayDailog">
       <table class="buy-dialog-table">
         <tr>
           <th>购买数量</th>
@@ -102,6 +102,11 @@
       </div>
     </my-dialog>
     <my-dialog :is-show="isPayDailog" @on-close="closePayDailog"></my-dialog>
+    <check-order :is-show-check-dialog="isShowCheckDialog"
+                 :order-id="orderId"
+                 @closeCheckDialog="closeCheckDialog"
+                 >
+    </check-order>
   </div>
 </template>
 
@@ -114,6 +119,7 @@
   import VSelection from '../../components/base/selection'
   import VMChooser from '../../components/base/multiplyChooser'
   import VChooser from '../../components/base/chooser'
+  import CheckOrder from '../../components/checkOrder.vue'
   export default {
     components: {
       VCounter,
@@ -121,7 +127,8 @@
       VMChooser,
       VChooser,
       MyDialog,
-      BankChooser
+      BankChooser,
+      CheckOrder
     },
     mounted(){
       this.computAnalysisPrice()
@@ -131,16 +138,47 @@
       this.period = this.periodList[0]
     },
     methods:{
-      confirmBuy(){},
-      onChangeBanks(bankObj){
-        this.bankid=bankObj.id
-        console.log(this.bankid)
-      },
-      closePayDailog(){
-        this.isShowPayDailog=false
-      },
       toShowPayDialog(){
         this.isShowPayDailog=true
+      },
+      closeCheckDialog(){
+                      console.log("jiancha")
+
+        this.isShowCheckDialog=false
+      },
+      confirmBuy(){
+        let buyVersionArray=_.map( this.versions,(item)=>{
+                  return item.value
+                  }
+                )
+        let reqParams={
+          buyNumber:this.buyNum,
+          buyType:this.buyType.value,
+          period:this.period.value,
+          verison:buyVersionArray.join(','),
+          bankId:this.bankId
+        }
+        axios.post('api/createOrder',reqParams)
+          .then((res)=>{
+            this.orderId=res.data.orderId
+            //支付成功
+            this.isShowCheckDialog=true
+            this.isShowPayDailog=false
+          })
+          .catch((error)=>{
+            console.log(error)
+            //支付失败?失败如何处理
+          })
+      },
+      onChangeBanks(bankObj){
+        this.bankId=bankObj.id
+        console.log(this.bankId)
+      },
+      closePayDailog(){
+        this.isPayDailog=false
+      },
+      closeShowPayDailog(){
+        this.isShowPayDailog=false
       },
       onParamChange(arr,val){
         this[arr]=val
@@ -170,13 +208,14 @@
     },
     data () {
       return {
+        isShowCheckDialog:false,
         isShowPayDailog:false,
+        isPayDailog:false,
         buyNum: 1,
         buyType: {},
         versions: [],
         period: {},
         price: 0,
-        bankid:null,
         versionList: [
           {
             label: '客户版',

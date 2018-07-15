@@ -9,7 +9,7 @@ import DetailAna from './pages/detail/analysis.vue'
 import DetailCou from './pages/detail/count.vue'
 import DetailFor from './pages/detail/forecast.vue'
 import DetailPub from './pages/detail/publish.vue'
-
+import orderList from './pages/orderList'
 import mock from './mock.js'
 Vue.use(VueRouter)
 let router=new VueRouter({
@@ -18,6 +18,10 @@ let router=new VueRouter({
           {
             path:'/',
             component:IndexPage
+          },
+          {
+            path:'/orderList',
+            component:orderList
           },
           {
             path:'/detail',
